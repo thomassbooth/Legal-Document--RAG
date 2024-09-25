@@ -5,7 +5,6 @@ from langchain_community.vectorstores import Qdrant, FAISS
 import openai
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from utils import read_pdf
-from clients.openai_client import OpenAIClient
 from langchain.schema import Document
 
 ae_doc_path = "./assets/Arabic Executive Regulation Law No 6-2016.pdf"
@@ -27,8 +26,8 @@ def augment_and_index_documents(document_path, index_type="qdrant"):
     document_objects = [Document(page_content=text) for text in document_chunks]
 
     # embeddings = OpenAIEmbeddings()
-    apikey = "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"
-    embeddings = OpenAIEmbeddings(openai_api_key=apikey)
+
+    # embeddings = OpenAIEmbeddings(openai_api_key=apikey)
 
     # for doc in document_objects:
     #     try:
@@ -37,12 +36,12 @@ def augment_and_index_documents(document_path, index_type="qdrant"):
     #     except Exception as e:
     #         print(f"Error creating embedding: {e}")
 
-    print(embeddings)
+    # print(embeddings)
 
 
     client = QdrantClient("http://localhost:6333")
     count = client.count(collection_name="my_documents")
-
+    print(count)
     # vector_db = Qdrant.from_documents(document_objects, embeddings, collection_name="my_documents")
     # # Initialize vector index based on chosen system (Qdrant or FAISS)
     # if index_type == "qdrant":

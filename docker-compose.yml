@@ -10,6 +10,21 @@ services:
       QDRANT_LOG_LEVEL: "info"  # Optional: Set log level (debug, info, warn, error)
     volumes:
       - qdrant_data:/qdrant/storage  # Persist data
+  client:
+    container_name: rag-system-fe
+    build:
+      context: ./rag-system-fe
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - 3001:3001
+  server:
+    container_name: rag-system-be
+    build:
+      context: ./rag-system-be
+      dockerfile: Dockerfile
+    ports:
+      - 8000:8000
 
   
 volumes:
