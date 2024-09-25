@@ -29,6 +29,7 @@ def augment_and_index_documents(document_path, index_type="qdrant"):
 
     # embeddings = OpenAIEmbeddings(openai_api_key=apikey)
 
+    
     # for doc in document_objects:
     #     try:
     #         embedding = embeddings.embed_documents([doc.page_content])

@@ -26,6 +26,7 @@ services:
     ports:
       - 8000:8000
 
-  
+
+# volume to persist data
 volumes:
   qdrant_data:
