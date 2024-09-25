@@ -32,15 +32,7 @@
   
 ## Running the application
 
-1. **Install dependencies**
-
-    Install dependencies needed for the project
-
-    ```bash
-    go mod tidy
-    ```
-
-2. **Run the application**
+1. **Build the application**
 
     Ensure youre at the root directory of the project
 
@@ -48,7 +40,7 @@
     docker-compose up --build -d
     ```
 
-3. **Accessing the application**
+2. **Accessing the application**
 
     The frontend application is being hosted at
     ```http://localhost:3001```
