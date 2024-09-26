@@ -1,13 +1,26 @@
-from fastapi import FastAPI, WebSocket
+from fastapi import FastAPI
+from .router import router
+from contextlib import asynccontextmanager
+from .embeddings import DocumentHandler
+import asyncio
 
-app = FastAPI()
 
+#using the context manager, on startup of the app before the server is started, we can run some expensive processes
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print('setting up ML models')
+    handler = DocumentHandler("en_doc")
+    handler.process_and_store(en_doc_path)
 
-@app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
-    await websocket.accept()
-    while True:
-        data = await websocket.receive_text()
-        response = "test"
-        for chunk in response:
-            await websocket.send_text(chunk)
+    # These processes are expensive, so running on two different threads cuts the startup time in half
+    # concurrently create embeddings for both documents and upload to the database
+    task1 = asyncio.create_task(handler.process_and_store(en_doc_path))
+
+    task2 = asyncio.create_task(w)
+    # yield is used here to pause the execution of the app, allowing us to clean up resources
+    yield
+    
+
+app = FastAPI(lifespan=lifespan)
+
+app.include_router(router)
