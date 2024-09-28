@@ -4,23 +4,23 @@ from .retrieval import EmbeddingModelLoader, VectorStoreManager, MemoryManager, 
 from qdrant_client import QdrantClient
 from dotenv import dotenv_values
 import json
+import os
 
 router = APIRouter()
 
 
 manager = ConnectionManager()
-api_key = dotenv_values("../.env").get("OPENAI_API_KEY")
+api_key = os.environ.get("OPENAI_API_KEY")
+qdrant_url = os.environ.get("QDRANT_CLIENT")
 embedding_loader = EmbeddingModelLoader(api_key)
 
 # Initialize vector store manager and memory manager
-qdrant_client = QdrantClient("http://qdrant:6333")
-vector_manager = VectorStoreManager(
-    qdrant_client, embedding_loader.get_model())
+qdrant_client = QdrantClient(qdrant_url)
+vector_manager = VectorStoreManager(qdrant_client, embedding_loader.get_model())
 memory_manager = MemoryManager()
 
 # Initialize Query Processor
-query_processor = QueryProcessor(
-    embedding_loader, vector_manager, memory_manager)
+query_processor = QueryProcessor(embedding_loader, vector_manager, memory_manager)
 
 
 @router.websocket("/ws")

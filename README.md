@@ -19,8 +19,6 @@
   - Handles retrieval strategies:
     - MultiQuery
     - RAG Fusion
-    - HyDE
-    - Step-back prompting
 
 
 - **`router.py`**
@@ -32,12 +30,15 @@
   
 ## Running the application
 
+1. **Setup environment variables**
+
 1. **Build the application**
 
     Ensure youre at the root directory of the project
 
     ```bash
-    docker-compose up --build -d
+    docker-compose build
+    docker-compose up -d
     ```
 
 2. **Accessing the application**

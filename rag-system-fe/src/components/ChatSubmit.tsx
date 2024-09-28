@@ -14,7 +14,7 @@ const ChatSubmit: React.FC<ChatSubmitProps> = ({ sendMessage }) => {
   const handleSubmit = useCallback(() => {
     sendMessage(message);
     setMessage("");
-  }, [message])
+  }, [message]);
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
@@ -23,21 +23,22 @@ const ChatSubmit: React.FC<ChatSubmitProps> = ({ sendMessage }) => {
   };
 
   return (
-    <div className="flex w-full max-w-xl items-center space-x-2">
+    <div className="flex w-full max-w-3xl items-center space-x-5">
       <Input
+        className="bg-zinc-700 w-full text-white border-0 placeholder:text-zinc-400 focus-visible::outline-none focus-visible:ring-0 rounded-full text-lg px-7 py-7"
         ref={inputRef}
-        value = {message}
+        value={message}
         placeholder="What do you need help with?"
         onChange={(e) => setMessage(e.target.value)}
-        onKeyDown = {(e) => handleKeyDown(e)}
+        onKeyDown={(e) => handleKeyDown(e)}
       />
       <Button
         type="submit"
         onClick={() => handleSubmit()}
-        className="rounded-full"
+        className="rounded-full h-[56px] w-[56px]"
         disabled={message == ""}
       >
-        <LuSend />
+        <LuSend size = {56} />
       </Button>
     </div>
   );

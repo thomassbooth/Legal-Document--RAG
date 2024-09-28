@@ -10,7 +10,7 @@ interface ResponseProps {
 const Response: React.FC<ResponseProps> = ({ type, text }) => {
     return (
       <li className={`w-full flex ${type ? 'justify-end' : 'justify-start'} my-2`}>
-        <div className="max-w-[60vw] p-2 bg-gray-200 rounded-lg">
+        <div className={`max-w-[60vw] ${type ? "bg-zinc-700 rounded-full px-6 py-3 text-white" : ""}`}>
           {text}
         </div>
       </li>

@@ -17,7 +17,7 @@ class DocumentProcessor:
     """Handles augmenting our document and generating embeddings"""
 
     def __init__(self):
-        apikey = os.getenv("OPENAI_API_KEY")
+        apikey = os.environ.get("OPENAI_API_KEY")
         if apikey is None:
             raise ValueError("OPENAI_API_KEY environment variable not set.")
         self._embeddingsModel = OpenAIEmbeddings(
@@ -26,8 +26,8 @@ class DocumentProcessor:
             separators=["\n\n", "\n", r"(?<=[.?!])\s+"],
             keep_separator=False,
             is_separator_regex=True,
-            chunk_size=1000,
-            chunk_overlap=0
+            chunk_size=700,
+            chunk_overlap=200
         )
 
     def document_augmentation(self, documentPath: str) -> list[Document]:
@@ -57,19 +57,21 @@ class DocumentStorage:
     """Handles storing the embeddings in the database"""
 
     def __init__(self):
-        self._client = QdrantClient("http://qdrant:6333")
+        self._qdrantUrl = os.environ.get("QDRANT_CLIENT")
+        self._client = QdrantClient(self._qdrantUrl)
 
-    def is_database_populated(self) -> bool:
+    def is_database_populated(self, collectionName) -> bool:
         """Checks if the database is already populated"""
-        count = self._client.count(collection_name="my_documents")
-        print(count)
+        count = self._client.count(collection_name=collectionName)
+        return count.count > 0
 
     def store_embeddings(self, embeddings: list[list[float]], documentChunks: list[str], collectionName) -> None:
         """Stores the embeddings in the vector database"""
         try:
             # count = self._client.count(collection_name=collectionName)
-            vector_db = Qdrant.from_documents(
-                documentChunks, embeddings, url = "http://qdrant:6333", collection_name=collectionName)
+            #put the embeddings in the database under the passed collection name
+            vectorDb = Qdrant.from_documents(
+                documentChunks, embeddings, url = self._qdrantUrl, collection_name=collectionName)
         except Exception as error:
             print(f"Error storing embeddings: {error}")
             if isinstance(error, ConnectionError):
@@ -92,12 +94,12 @@ class DocumentHandler:
     def process_and_store(self, document_path: str) -> None:
         """End-to-end processing: document augmentation, embedding generation, and pushing to Qdrant."""
 
-        document_chunks = self.processor.document_augmentation(document_path)
-        embeddings = self.processor.generate_embeddings(document_chunks)
+        documentChunks = self.processor.document_augmentation(document_path)
+        embeddings = self.processor.generate_embeddings(documentChunks)
 
         if embeddings:
             self.storage.store_embeddings(
-                embeddings, document_chunks, self._collectionName)
+                embeddings, documentChunks, self._collectionName)
     
 
 if __name__ == "__main__":

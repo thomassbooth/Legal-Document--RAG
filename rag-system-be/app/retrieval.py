@@ -17,7 +17,7 @@ from langchain_core.runnables import RunnablePassthrough
 
 
 class LanguageDetector:
-
+    """Detects the language of a given query"""
     @staticmethod
     def detect_language(query: str) -> str:
         try:
@@ -30,33 +30,34 @@ class LanguageDetector:
 
 
 class EmbeddingModelLoader:
-
+    """Loads the OpenAI Embeddings model"""
     def __init__(self, api_key: str):
-        self.embedding_model = OpenAIEmbeddings(api_key=api_key)
+        self.embeddingModel = OpenAIEmbeddings(api_key=api_key)
 
     def get_model(self):
-        return self.embedding_model
+        return self.embeddingModel
 
 
 class VectorStoreManager:
-
+    """Manages the vector store based on the language"""
     def __init__(self, qdrant_client: QdrantClient, embedding_model: OpenAIEmbeddings):
-        self._en_vectorstore = Qdrant(
+        self._enVectorstore = Qdrant(
             client=qdrant_client, collection_name="en_doc", embeddings=embedding_model)
-        self._ar_vectorstore = Qdrant(
+        self._arVectorstore = Qdrant(
             client=qdrant_client, collection_name="ar_doc", embeddings=embedding_model)
 
     def get_vectorstore(self, language: str) -> Qdrant:
+        """Retrieve the vector store based on the language"""
         if language == "en":
-            return self._en_vectorstore
+            return self._enVectorstore
         elif language == "ar":
-            return self._ar_vectorstore
+            return self._arVectorstore
         else:
             raise ValueError(f"Unsupported language: {language}")
 
 
 class MemoryManager:
-
+    """For ecah user we want to store their memory, this should be in a database but for simplicity i use a map"""
     def __init__(self):
         # Store memory for each user based on user ID
         self.user_memories = {}
@@ -69,18 +70,18 @@ class MemoryManager:
 
     def get_chat_history(self, user_id: str) -> str:
         """Retrieve chat history for a specific user."""
-        user_memory = self._get_user_memory(user_id)
-        memory_variables = user_memory.load_memory_variables({})
-        return memory_variables.get('history', '')
+        userMemory = self._get_user_memory(user_id)
+        memoryVars = userMemory.load_memory_variables({})
+        return memoryVars.get('history', '')
 
     def save_chat_context(self, user_id: str, query: str, response: str):
         """Save the conversation context for a specific user."""
-        user_memory = self._get_user_memory(user_id)
-        user_memory.save_context({"question": query}, {"answer": response})
+        userMemory = self._get_user_memory(user_id)
+        userMemory.save_context({"question": query}, {"answer": response})
 
 
 class QueryProcessor:
-
+    """Processes the user query and retrieves relevant documents"""
     def __init__(self, embedding_model_loader: EmbeddingModelLoader, vectorstore_manager: VectorStoreManager, memory_manager: MemoryManager):
         self._embedding_model_loader = embedding_model_loader
         self._vectorstore_manager = vectorstore_manager
@@ -100,11 +101,12 @@ class QueryProcessor:
         except:
             return "Please type your query in either Arabic or English, thank you!"
         # Retrieve conversation history from memory
-        chat_history = self._memory_manager.get_chat_history(userid)
-        full_query = f"{chat_history}\n\nUser: {query}"
+        chatHistory = self._memory_manager.get_chat_history(userid)
+        fullQuery = f"{chatHistory}\n\nUser: {query}"
 
         # Select vector store based on the language
         vectorstore = self._vectorstore_manager.get_vectorstore(language)
+        # Use a multiquery retriever to generate multiple prompts, grab docs then combine the result
         retriever = MultiQueryRetriever.from_llm(
             retriever=vectorstore.as_retriever(
                 search_type="similarity", search_kwargs={"k": 10}),
@@ -114,8 +116,8 @@ class QueryProcessor:
         # Load the prompt template from the hub
         prompt = hub.pull("rlm/rag-prompt")
 
-        # Create the RAG chain (Retriever-LLM-Generator)
-        rag_chain = (
+        # Create the RAG chain, this essentially pipes each part as its computed as it goes through the chain
+        ragChain = (
             # Adjusting to work with the chain
             {"context": retriever | self._format_docs,
                 "question": RunnablePassthrough()}
@@ -125,15 +127,15 @@ class QueryProcessor:
         )
 
         # Stream the results using the formatted context and user query
-        final_response = ""
-        for chunk in rag_chain.stream({"question": full_query}):
+        finalResponse = ""
+        for chunk in ragChain.stream({"question": fullQuery}):
             print(chunk, end="", flush=True)
-            final_response += chunk
+            finalResponse += chunk
 
         # Save the conversation context in memory
-        self._memory_manager.save_chat_context(userid, query, final_response)
+        self._memory_manager.save_chat_context(userid, query, finalResponse)
 
-        return final_response
+        return finalResponse
 
 
 if __name__ == "__main__":
