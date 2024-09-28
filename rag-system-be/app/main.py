@@ -11,18 +11,18 @@ import os
 @asynccontextmanager
 async def lifespan(app: FastAPI):
 
-    client = QdrantClient("http://qdrant:6333")
-    count = client.count(collection_name="en_doc")
-    print(count)
-    # print('setting up DB for queries')
-    # handlerEn = DocumentHandler("en_doc")
-    handlerAr = DocumentHandler("test")
-    # #get our paths
-    # enPath = get_assets_file_path("en-law.pdf")
-    arPath = get_assets_file_path("en-law.pdf")
-    # # These processes are expensive, so running on two different threads cuts the startup time in half
-    # # concurrently create embeddings for both documents and upload to the database
-    handlerAr.process_and_store(arPath)
+    # client = QdrantClient("http://qdrant:6333")
+    # count = client.count(collection_name="en_doc")
+    # print(count)
+    # # print('setting up DB for queries')
+    # # handlerEn = DocumentHandler("en_doc")
+    # handlerAr = DocumentHandler("test")
+    # # #get our paths
+    # # enPath = get_assets_file_path("en-law.pdf")
+    # arPath = get_assets_file_path("en-law.pdf")
+    # # # These processes are expensive, so running on two different threads cuts the startup time in half
+    # # # concurrently create embeddings for both documents and upload to the database
+    # handlerAr.process_and_store(arPath)
     # # arDocThread = asyncio.create_task(handlerAr.process_and_store(arPath))
     
     # #wait for our two threads to finish their processes so we can boot up the server

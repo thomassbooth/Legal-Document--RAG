@@ -23,6 +23,8 @@ services:
       - 3001:3001
   server:
     container_name: rag-system-be
+    volumes:
+      - .:/rag-system-be
     build:
       context: ./rag-system-be
       dockerfile: Dockerfile
