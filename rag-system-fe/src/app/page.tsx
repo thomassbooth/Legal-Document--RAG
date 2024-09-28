@@ -1,13 +1,16 @@
 "use client";
 
 import ChatSubmit from "@/components/ChatSubmit";
-import { Textarea } from "@/components/ui/textarea";
+import Container from "@/components/Container";
+import Response from "@/components/Response";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import PreviousMap from "postcss/lib/previous-map";
 import { useEffect, useState } from "react";
 
 export default function Home() {
-  const [ws, setWs] = useState(null);
-  const [message, setMessage] = useState("");
-  const [messageHistory, setMessageHistory] = useState([]);
+  const [ws, setWs] = useState<WebSocket>();
+  const [messageHistory, setMessageHistory] = useState<Message[] | []>([{user: 0, data: "Hey! How can I help you today?"}]);
+  const [thinking, setThinking] = useState<boolean>(false);
 
   useEffect(() => {
     // Initialize WebSocket connection to FastAPI server
@@ -16,16 +19,17 @@ export default function Home() {
     // Set up event listeners
     socket.onopen = () => {
       console.log("Connected to WebSocket server");
-      //@ts-expect-error yes
       setWs(socket);
     };
 
     socket.onmessage = (event) => {
       // Add new received message to state
-      //@ts-expect-error yes
-      
-      setMessageHistory((prevHistory) => [...prevHistory, event.data]);
-      console.log('got message')
+      setThinking(false)
+      setMessageHistory((prevHistory) => [
+        ...prevHistory,
+        { user: 0, data: event.data },
+      ]);
+      console.log("got message");
     };
 
     socket.onerror = (error) => {
@@ -44,36 +48,36 @@ export default function Home() {
     };
   }, []);
 
-  const sendMessage = () => {
-    //@ts-expect-error yes
+  const sendMessage = (message: string) => {
     if (ws && ws.readyState === WebSocket.OPEN && message) {
-      //@ts-expect-error yes
-      ws.send(message);
-      console.log('sent')
-      setMessage(""); // Clear input after sending
+      setThinking(true)
+      ws.send(JSON.stringify({userid: 1, message: message}));
+      
+      setMessageHistory((prevHist) => [
+        ...prevHist,
+        { user: 1, data: message },
+      ]);
     }
+    
   };
 
   return (
     <div className="flex flex-col items-center justify-bottom">
-      <h1 className="text-2xl font-bold mb-4">WebSocket Client</h1>
-
-      <button
-        onClick={sendMessage}
-        className="px-4 py-2 bg-blue-500 text-white"
-      >
-        Send Message
-      </button>
-
-      <div className="mt-6">
-        <h2 className="text-xl font-semibold">Messages Received:</h2>
-        <ul className="flex gap-2 w-full flex-wrap">
-          {messageHistory.map((msg, index) => (
-            <li key={index}>{msg}</li>
-          ))}
-        </ul>
+      <h1 className="text-2xl font-bold mb-4">RAG-System Takehome</h1>
+      <div className="mt-6 w-full">
+        <h2 className="text-xl font-semibold">Message History</h2>
+        <ScrollArea className="w-full h-[75vh]">
+          <Container>
+          <ul className="flex gap-2 w-full flex-wrap">
+            {messageHistory.map((msg, index) => (
+              <Response key={index} type={msg.user} text={msg.data} />
+            ))}
+          </ul>
+          {thinking && <Response type={0} text="Thinking..." />}
+          </Container>
+        </ScrollArea>
       </div>
-      <ChatSubmit/>
+      <ChatSubmit sendMessage={sendMessage}/>
     </div>
   );
 }
