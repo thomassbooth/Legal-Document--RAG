@@ -62,3 +62,6 @@
 
 - **Qdrant dashboard**
   - Check your qdrant data is populated after server start up here: http://localhost:6333/dashboard
+ 
+- **UserID**
+  - At the top of the webpage there is a UserID feature, this is just to simulate someone logging in for history purposes. Please put in any ID you wish, ideally this would be done using an OAuth login utilizing JWTs to pass a user identifier between the server and client.
