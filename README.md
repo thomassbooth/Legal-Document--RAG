@@ -1,7 +1,9 @@
 # Retrieval Augmented Generation - System
 
 ## Overview
-- This project implements a Retrieval-Augmented Generation (RAG) system using Python and a frontend built with Nextjs - TypeScript, and advanced retrieval strategies like Multi-Query, RAG Fusion, HyDE, and more. It leverages Qdrant and uses streaming response mechanisms to delivery queries to the frontend. The system is designed to manage both English and Arabic versions of a legal document, routing queries through distinct index databases and utilizing a modular, containerized architecture.
+- This project implements a Retrieval-Augmented Generation (RAG) system using Python and a frontend built with Nextjs - TypeScript, and advanced retrieval strategies: Multi-Query, RAG Fusion It leverages Qdrant and uses streaming response mechanisms to delivery queries to the frontend. The system is designed to manage both English and Arabic versions of a legal document, routing queries through distinct index databases and utilizing a modular, containerized architecture.
+
+- This project supports querying in Arabic, returning an Arabic response and also the same in English.
 
 ## Project Structure
 ### rag-system-be - backend server application
@@ -53,3 +55,10 @@
     ```http://localhost:3000```
 
 ## Additions
+
+- **Server Startup**
+  - On startup of the server, it generates and stores the embeddings. This might take a couple of mins to do.
+
+
+- **Qdrant dashboard**
+  - Check your qdrant data is populated after server start up here: http://localhost:6333/dashboard

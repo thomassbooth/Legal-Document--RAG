@@ -1,7 +1,7 @@
 import os
 from qdrant_client import QdrantClient
 from langchain_openai import OpenAIEmbeddings
-from langchain_community.vectorstores import Qdrant, FAISS
+from langchain_community.vectorstores import Qdrant
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from .utils import read_pdf
 from langchain.schema import Document
@@ -62,8 +62,12 @@ class DocumentStorage:
 
     def is_database_populated(self, collectionName) -> bool:
         """Checks if the database is already populated"""
-        count = self._client.count(collection_name=collectionName)
-        return count.count > 0
+        try:
+            count = self._client.count(collection_name=collectionName)
+            print(count)
+            return count.count > 0
+        except Exception as err:
+            return False
 
     def store_embeddings(self, embeddings: list[list[float]], documentChunks: list[str], collectionName) -> None:
         """Stores the embeddings in the vector database"""
@@ -100,6 +104,11 @@ class DocumentHandler:
         if embeddings:
             self.storage.store_embeddings(
                 embeddings, documentChunks, self._collectionName)
+            
+    def get_is_populated(self):
+        return self.storage.is_database_populated(self._collectionName)
+        
+
     
 
 if __name__ == "__main__":

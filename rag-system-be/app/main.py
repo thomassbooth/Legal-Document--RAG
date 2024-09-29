@@ -25,8 +25,12 @@ async def lifespan(app: FastAPI):
     # count = client.count(collection_name="en_doc")
     handlerEn = DocumentHandler("en_doc")
     handlerAr = DocumentHandler("ar_doc")
-    await asyncio.gather(process_doc(handlerEn, "en-law.pdf"),
-                         process_doc(handlerAr, "ar-law.pdf"))
+
+    #we only want to regenerate our embeddings if they are not already populated
+    if (handlerAr.get_is_populated() == False and handlerEn.get_is_populated() == False):
+
+        await asyncio.gather(process_doc(handlerEn, "en-law.pdf"),
+                            process_doc(handlerAr, "ar-law.pdf"))
 
     # yield is used here to pause the execution of the app, allowing us to clean up resources on close
     yield
