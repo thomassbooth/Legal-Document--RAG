@@ -1,6 +1,6 @@
 export async function getUserHistory(userId: number) {
     try {
-        const response = await fetch(`http://localhost:8000/user-history/${userId}`, {
+        const response = await fetch(`http://${process.env.NEXT_PUBLIC_WEBSOCKET_URL as string || "localhost:8000"}/user-history/${userId}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',

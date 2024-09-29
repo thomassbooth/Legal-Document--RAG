@@ -20,9 +20,9 @@ services:
       dockerfile: Dockerfile
     restart: always
     ports:
-      - 3001:3001
+      - 3000:3000
     environment:
-      WEBSOCKET_URL: ws://localhost:8000/ws
+      BACKEND_URL: localhost:8000
   server:
     container_name: rag-system-be
     volumes:

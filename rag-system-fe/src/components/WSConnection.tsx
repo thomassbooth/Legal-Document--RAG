@@ -14,7 +14,7 @@ const WSConnection:React.FC<WSConnectionProps> = ({onConnect, userId, setUserId}
 
   const handleConnect = () => {
     if (userId !== undefined) {
-      const ws = new WebSocket("ws://localhost:8000/ws");
+      const ws = new WebSocket(`ws://${process.env.NEXT_PUBLIC_WEBSOCKET_URL as string || "localhost:8000"}/ws`);
       onConnect(ws);  // Pass the WebSocket connection to parent
     }
   };
