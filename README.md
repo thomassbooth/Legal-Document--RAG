@@ -19,10 +19,13 @@
   - Handles retrieval strategies:
     - MultiQuery
     - RAG Fusion
+  - Handles user history
 
+- **`connections`**
+  - Class for handling connections with the websocket
 
 - **`router.py`**
-  - Holds our routes for the Fastapi server, this is just a websocket endpoint.
+  - Holds our routes for the Fastapi server, this is just a websocket and history endpoint.
 
 ### rag-system-fe - frontend application (nextjs)
 
@@ -31,6 +34,9 @@
 ## Running the application
 
 1. **Setup environment variables**
+
+    Ensure at the root of the directory, create a .env file and create a value called
+    ```OPENAI_API_KEY=YOURAPIKEY```
 
 1. **Build the application**
 
@@ -44,6 +50,6 @@
 2. **Accessing the application**
 
     The frontend application is being hosted at
-    ```http://localhost:3001```
+    ```http://localhost:3000```
 
 ## Additions
