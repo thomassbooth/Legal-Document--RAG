@@ -52,7 +52,7 @@
 2. **Accessing the application**
 
     The frontend application is being hosted locally on port 3000:
-    ```http://localhost:3000```
+    http://localhost:3000
 
 ## Additions
 
