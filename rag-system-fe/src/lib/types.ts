@@ -1,5 +1,5 @@
 
 interface Message {
-    user: number;
+    userType: number;
     data: string;
 }

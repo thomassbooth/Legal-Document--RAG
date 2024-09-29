@@ -1,35 +1,33 @@
+import { getUserHistory } from "@/actions/getUserHistory";
 import { useEffect, useState } from "react";
 
 const useWebSocket = () => {
   const [ws, setWs] = useState<WebSocket | null>(null); // WebSocket can now be set dynamically
   const [messageHistory, setMessageHistory] = useState<Message[]>([]);
   const [thinking, setThinking] = useState<boolean>(false);
+  const [userId, setUserId] = useState<number | undefined>(undefined);
 
   // when user name changes, we need to refresh the history
   useEffect(() => {
-    setMessageHistory([]);
+    if (!userId) return;
+    async function fetchHistory() {
+      const history = await getUserHistory(userId as number);
+      setMessageHistory([...history["history"]]);
+    }
+    fetchHistory();
   }, [ws]);
 
   useEffect(() => {
     if (!ws) return;
-
-    // Set up WebSocket event listeners
-    ws.onopen = () => {
-      console.log("Connected to WebSocket server");
-    };
 
     ws.onmessage = (event) => {
       // Process incoming messages and update state
       setThinking(false);
       setMessageHistory((prevHistory) => [
         ...prevHistory,
-        { user: 0, data: event.data },
+        { userType: 0, data: event.data },
       ]);
       console.log("Received message");
-    };
-
-    ws.onerror = (error) => {
-      console.error("WebSocket error:", error);
     };
 
     ws.onclose = () => {
@@ -38,6 +36,7 @@ const useWebSocket = () => {
 
     // Clean up WebSocket on unmount
     return () => {
+      console.log("Cleaning up WebSocket connection");
       if (ws.readyState === WebSocket.OPEN) {
         ws.close();
       }
@@ -45,20 +44,28 @@ const useWebSocket = () => {
   }, [ws]); // Depend on the WebSocket connection
 
   // Send a message to the WebSocket server
-  const sendMessage = (message: string) => {
+  const sendMessage = (message: string, userId: number) => {
     //check the websocket is ready and there is acutally a message
     if (ws && ws.readyState === WebSocket.OPEN && message) {
       setThinking(true);
-      ws.send(JSON.stringify({ userid: 1, message }));
+      ws.send(JSON.stringify({ userid: userId, message }));
 
       setMessageHistory((prevHistory) => [
         ...prevHistory,
-        { user: 1, data: message },
+        { userType: 1, data: message },
       ]);
     }
   };
 
-  return { ws, messageHistory, thinking, sendMessage, setWs }; // Expose setWs to set the WebSocket dynamically
+  return {
+    ws,
+    messageHistory,
+    thinking,
+    sendMessage,
+    setWs,
+    userId,
+    setUserId,
+  }; // Expose setWs to set the WebSocket dynamically
 };
 
 export default useWebSocket;

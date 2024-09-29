@@ -8,7 +8,6 @@ class ConnectionManager:
     async def connect(self, websocket: WebSocket):
         await websocket.accept()
         self.activeConnections.append(websocket)
-        await websocket.send_text("Hey! Nice to meet you, what can I help you with today?")
 
     def disconnect(self, websocket: WebSocket):
         self.activeConnections.remove(websocket)

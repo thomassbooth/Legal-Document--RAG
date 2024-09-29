@@ -1,7 +1,7 @@
 from langdetect import detect
 from qdrant_client import QdrantClient
 from langchain_openai import OpenAIEmbeddings
-from langchain_community.vectorstores import Qdrant, FAISS
+from langchain_community.vectorstores import Qdrant
 from dotenv import dotenv_values
 from langchain_openai import ChatOpenAI
 from langchain import hub
@@ -31,6 +31,7 @@ class LanguageDetector:
 
 class EmbeddingModelLoader:
     """Loads the OpenAI Embeddings model"""
+
     def __init__(self, api_key: str):
         self.embeddingModel = OpenAIEmbeddings(api_key=api_key)
 
@@ -40,6 +41,7 @@ class EmbeddingModelLoader:
 
 class VectorStoreManager:
     """Manages the vector store based on the language"""
+
     def __init__(self, qdrant_client: QdrantClient, embedding_model: OpenAIEmbeddings):
         self._enVectorstore = Qdrant(
             client=qdrant_client, collection_name="en_doc", embeddings=embedding_model)
@@ -58,11 +60,12 @@ class VectorStoreManager:
 
 class MemoryManager:
     """For ecah user we want to store their memory, this should be in a database but for simplicity i use a map"""
+
     def __init__(self):
         # Store memory for each user based on user ID
         self.user_memories = {}
 
-    def _get_user_memory(self, user_id: str):
+    def _get_user_memory(self, user_id: str) -> ConversationBufferMemory:
         """Retrieve or initialize a ConversationBufferMemory for the given user_id."""
         if user_id not in self.user_memories:
             self.user_memories[user_id] = ConversationBufferMemory()
@@ -72,16 +75,17 @@ class MemoryManager:
         """Retrieve chat history for a specific user."""
         userMemory = self._get_user_memory(user_id)
         memoryVars = userMemory.load_memory_variables({})
-        return memoryVars.get('history', '')
+        return memoryVars
 
     def save_chat_context(self, user_id: str, query: str, response: str):
         """Save the conversation context for a specific user."""
         userMemory = self._get_user_memory(user_id)
-        userMemory.save_context({"question": query}, {"answer": response})
+        userMemory.save_context({"input": query}, {"output": response})
 
 
 class QueryProcessor:
     """Processes the user query and retrieves relevant documents"""
+
     def __init__(self, embedding_model_loader: EmbeddingModelLoader, vectorstore_manager: VectorStoreManager, memory_manager: MemoryManager):
         self._embedding_model_loader = embedding_model_loader
         self._vectorstore_manager = vectorstore_manager
@@ -102,16 +106,13 @@ class QueryProcessor:
             return "Please type your query in either Arabic or English, thank you!"
         # Retrieve conversation history from memory
         chatHistory = self._memory_manager.get_chat_history(userid)
-        fullQuery = f"{chatHistory}\n\nUser: {query}"
+        fullQuery = f"{chatHistory.get('history', '')}\n\nUser: {query}"
 
         # Select vector store based on the language
         vectorstore = self._vectorstore_manager.get_vectorstore(language)
         # Use a multiquery retriever to generate multiple prompts, grab docs then combine the result
-        retriever = MultiQueryRetriever.from_llm(
-            retriever=vectorstore.as_retriever(
-                search_type="similarity", search_kwargs={"k": 10}),
-            llm=self._llm
-        )
+        retriever = MultiQueryRetriever.from_llm(retriever=vectorstore.as_retriever(
+            search_type="similarity", search_kwargs={"k": 10}), llm=self._llm)
 
         # Load the prompt template from the hub
         prompt = hub.pull("rlm/rag-prompt")

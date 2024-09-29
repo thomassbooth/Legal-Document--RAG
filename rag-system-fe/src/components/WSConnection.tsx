@@ -4,12 +4,13 @@ import { Button } from "./ui/button";
 import { TbPlugConnected } from "react-icons/tb";
 
 interface WSConnectionProps {
-    onConnect: Dispatch<SetStateAction<WebSocket | null>>  // Pass WebSocket back to parent
+    onConnect: Dispatch<SetStateAction<WebSocket | null>>
+    userId: number | undefined
+    setUserId: Dispatch<SetStateAction<number | undefined>>  // Pass WebSocket back to parent
   }
 
 
-const WSConnection:React.FC<WSConnectionProps> = ({onConnect}) => {
-  const [userId, setUserId] = useState<number>();
+const WSConnection:React.FC<WSConnectionProps> = ({onConnect, userId, setUserId}) => {
 
   const handleConnect = () => {
     if (userId !== undefined) {

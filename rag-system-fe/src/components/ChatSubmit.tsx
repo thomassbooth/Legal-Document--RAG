@@ -4,15 +4,17 @@ import { Button } from "./ui/button";
 import { LuSend } from "react-icons/lu";
 
 interface ChatSubmitProps {
-  sendMessage: (message: string) => void;
+  sendMessage: (message: string, userId: number) => void;
+  userId: number | undefined;
 }
 
-const ChatSubmit: React.FC<ChatSubmitProps> = ({ sendMessage }) => {
+const ChatSubmit: React.FC<ChatSubmitProps> = ({ sendMessage, userId }) => {
   const [message, setMessage] = useState<string>("");
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleSubmit = useCallback(() => {
-    sendMessage(message);
+    if (!userId || !message) return;
+    sendMessage(message, userId);
     setMessage("");
   }, [message]);
 
