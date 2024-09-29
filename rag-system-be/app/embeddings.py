@@ -106,6 +106,7 @@ class DocumentHandler:
                 embeddings, documentChunks, self._collectionName)
             
     def get_is_populated(self):
+        """Checks if the database is already populated"""
         return self.storage.is_database_populated(self._collectionName)
         
 

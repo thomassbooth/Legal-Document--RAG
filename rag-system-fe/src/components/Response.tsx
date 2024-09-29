@@ -6,7 +6,12 @@ interface ResponseProps {
     text : string
 }
 
-
+/**
+ * Component for displaying a response message
+ * @param type: 0 for user, 1 for bot
+ * @param text message text
+ * @returns Response component
+ */
 const Response: React.FC<ResponseProps> = ({ type, text }) => {
     return (
       <li className={`w-full flex ${type ? 'justify-end' : 'justify-start'} my-2`}>

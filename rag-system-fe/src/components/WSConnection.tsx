@@ -9,7 +9,13 @@ interface WSConnectionProps {
     setUserId: Dispatch<SetStateAction<number | undefined>>  // Pass WebSocket back to parent
   }
 
-
+/**
+ * Component to setup a connection to the WebSocket server
+ * @param onConnect: Function to set the WebSocket connection
+ * @param userId: User ID
+ * @param setUserId: Function to set the User ID
+ * @returns Text input and button to setup a connection to the WebSocket server
+ */
 const WSConnection:React.FC<WSConnectionProps> = ({onConnect, userId, setUserId}) => {
 
   const handleConnect = () => {

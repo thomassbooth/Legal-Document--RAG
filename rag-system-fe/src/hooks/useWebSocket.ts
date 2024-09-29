@@ -17,6 +17,7 @@ const useWebSocket = () => {
     fetchHistory();
   }, [ws]);
 
+  // Set up WebSocket connection
   useEffect(() => {
     if (!ws) return;
 

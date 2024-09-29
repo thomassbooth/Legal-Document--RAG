@@ -15,9 +15,6 @@ async def process_doc(handler, file):
     # Run the blocking process_and_store in a thread pool
     await loop.run_in_executor(None, handler.process_and_store, path)
 
-# using the context manager, on startup of the app before the server is started, we can run some expensive processes
-
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
 
@@ -28,7 +25,7 @@ async def lifespan(app: FastAPI):
 
     #we only want to regenerate our embeddings if they are not already populated
     if (handlerAr.get_is_populated() == False and handlerEn.get_is_populated() == False):
-
+        # Push off to other threads since these are expensive, cutting the runtime in two
         await asyncio.gather(process_doc(handlerEn, "en-law.pdf"),
                             process_doc(handlerAr, "ar-law.pdf"))
 
@@ -42,9 +39,8 @@ app.include_router(router)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Adjust this to your actual frontend domain(s)
+    allow_origins=["*"],
     allow_credentials=True,
-    # Allow all methods, or restrict to specific methods like ['GET']
     allow_methods=["*"],
-    allow_headers=["*"],  # Allow all headers, or restrict as necessary
+    allow_headers=["*"]
 )

@@ -5,6 +5,7 @@ import os
 
 
 def read_pdf(file_path):
+    """Read text from a PDF file"""
     text = ""
     # Open the PDF file
     logging.info(f"Opening PDF file: {file_path}")
@@ -15,14 +16,12 @@ def read_pdf(file_path):
 
 
 def get_assets_file_path(file_name):
-
-    # Get the directory of the current script
+    """Get the path to a file in the 'assets' directory"""
     currDir = os.path.dirname(__file__)
 
-    # Define the path to the 'ar-law.pdf' file in the 'assets' directory
+    # Define the path to the assests directory
     filePath = os.path.join(currDir, f'../assets/{file_name}')
-
-    # Normalize the path (optional)
+    # Normalize path
     filePath = os.path.normpath(filePath)
 
     return filePath

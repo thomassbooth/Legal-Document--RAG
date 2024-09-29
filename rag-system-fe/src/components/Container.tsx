@@ -4,6 +4,11 @@ interface ContainerProps {
   children: React.ReactNode;
 }
 
+/**
+ * Generic container component
+ * @param children 
+ * @returns component with standard padding and sizing
+ */
 const Container: React.FC<ContainerProps> = ({ children }) => {
   return (
     <div className="xl-p-20 2xl-25 mx-auto w-3/4 px-10 md:px-15 xl:px-25">

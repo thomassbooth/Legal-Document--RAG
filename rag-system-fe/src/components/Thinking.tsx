@@ -1,5 +1,9 @@
 import React from "react";
 
+/**
+ * Component for displaying a thinking spinner
+ * @returns Thinking spinner with text
+ */
 const Thinking = () => {
   return (
     <div className="flex text-white space-x-2">

@@ -42,7 +42,8 @@ async def websocket_endpoint(websocket: WebSocket):
 
 
 @router.get("/user-history/{userid}")
-async def check_database_populated(userid: int):
+async def get_user_history(userid: int):
+    """Get the users history, if it exists else return a welcome message"""
     history = memory_manager.get_chat_history(userid)
 
     if history.get('history') == "":

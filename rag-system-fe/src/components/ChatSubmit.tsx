@@ -8,10 +8,16 @@ interface ChatSubmitProps {
   userId: number | undefined;
 }
 
+/**
+ * Component that handles sending a message to the websocket server, and updating the message state
+ * @param sendMessage: Function to send a message to the WebSocket server 
+ * @returns Input and button to submit a message to the server
+ */
 const ChatSubmit: React.FC<ChatSubmitProps> = ({ sendMessage, userId }) => {
   const [message, setMessage] = useState<string>("");
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Submit a message callback
   const handleSubmit = useCallback(() => {
     if (!userId || !message) return;
     sendMessage(message, userId);
