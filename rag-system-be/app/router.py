@@ -35,7 +35,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 await manager.disconnect(websocket)
                 return
 
-            await manager.send_message(query_processor.process_query(query["message"], query["userid"]))
+            await query_processor.process_query(query["message"], query["userid"], websocket)
 
     except WebSocketDisconnect:
         manager.disconnect(websocket)

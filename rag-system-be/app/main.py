@@ -32,6 +32,8 @@ async def lifespan(app: FastAPI):
     # yield is used here to pause the execution of the app, allowing us to clean up resources on close
     yield
 
+    print('server shutdown')
+
 
 app = FastAPI(lifespan=lifespan)
 

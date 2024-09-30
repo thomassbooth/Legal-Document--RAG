@@ -9,6 +9,7 @@ from langchain.retrievers.multi_query import MultiQueryRetriever
 from langchain.memory import ConversationBufferMemory
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
+from fastapi import WebSocket
 
 # steps to take
 # Convert my user query into an embedding vector, this way we can match what we have in the vector database
@@ -98,12 +99,17 @@ class QueryProcessor:
         """Format retrieved documents into a single string"""
         return "\n\n".join(doc.page_content for doc in docs)
 
-    def process_query(self, query: str, userid: int) -> str:
+    async def process_query(self, query: str, userid: int, ws: WebSocket):
         """Process and query the vector store based on the language and query"""
+        print('inside process query')
         try:
             language = LanguageDetector.detect_language(query)
         except:
-            return "Please type your query in either Arabic or English, thank you!"
+            error_message = "Please type your query in either Arabic or English, thank you!"
+            await ws.send_text("start+")
+            await ws.send_text(error_message)
+            await ws.send_text("end+")
+            return
         # Retrieve conversation history from memory
         chatHistory = self._memory_manager.get_chat_history(userid)
         fullQuery = f"{chatHistory.get('history', '')}\n\nUser: {query}"
@@ -127,16 +133,21 @@ class QueryProcessor:
             | StrOutputParser()
         )
 
-        # Stream the results using the formatted context and user query
+        # Stream the results using the formatted context and user query this is an async generator, so no need to use yield
         finalResponse = ""
-        for chunk in ragChain.stream({"question": fullQuery}):
-            print(chunk, end="", flush=True)
+        first = True
+        async for chunk in ragChain.astream({"question": fullQuery}):
+            if first:
+                first = False
+                await ws.send_text("start+")
             finalResponse += chunk
+            await ws.send_text(chunk)
 
+        await ws.send_text("end+")
         # Save the conversation context in memory
         self._memory_manager.save_chat_context(userid, query, finalResponse)
 
-        return finalResponse
+        # return finalResponse
 
 
 if __name__ == "__main__":

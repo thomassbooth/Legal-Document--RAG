@@ -1,11 +1,12 @@
 import { getUserHistory } from "@/actions/getUserHistory";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const useWebSocket = () => {
   const [ws, setWs] = useState<WebSocket | null>(null); // WebSocket can now be set dynamically
   const [messageHistory, setMessageHistory] = useState<Message[]>([]);
   const [thinking, setThinking] = useState<boolean>(false);
   const [userId, setUserId] = useState<number | undefined>(undefined);
+  const streamRef = useRef<boolean>(false);
 
   // when user name changes, we need to refresh the history
   useEffect(() => {
@@ -23,12 +24,28 @@ const useWebSocket = () => {
 
     ws.onmessage = (event) => {
       // Process incoming messages and update state
+      console.log(event.data)
       setThinking(false);
-      setMessageHistory((prevHistory) => [
-        ...prevHistory,
-        { userType: 0, data: event.data },
-      ]);
-      console.log("Received message");
+      // we send a start+ to tell us were expecting a stream so setup the value
+      if (event.data === "start+") {
+        streamRef.current = true;
+        setMessageHistory((prevHistory) => [
+          ...prevHistory,
+          { userType: 0, data: "" }, // Start a new message
+        ]);
+        return;
+      } else if (event.data === "end+") {
+        streamRef.current = false;
+        return;
+      }
+      // if we are in a stream, append the data to the last message
+      if (streamRef.current) {
+        setMessageHistory((prevHistory) => [
+          ...prevHistory.slice(0, prevHistory.length - 1),
+          { userType: 0, data: prevHistory[prevHistory.length - 1].data + event.data },
+        ]);
+        console.log("Received message");
+      }
     };
 
     ws.onclose = () => {
